@@ -1,0 +1,8 @@
+{
+  "name": "Cehpoint AI Recruiter",
+  "description": "AI-driven HR interview platform for Cehpoint. Conducts real-time voice interviews for various roles in multiple languages.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

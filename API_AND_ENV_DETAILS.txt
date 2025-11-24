@@ -1,0 +1,45 @@
+# API & Environment Configuration Details
+
+This document outlines the specific API models, SDKs, and environment variables currently implemented in the Cehpoint AI Recruiter application.
+
+## 1. Active API Model
+The application is currently configured to use the **Google Gemini Multimodal Live API**.
+
+*   **Model Name**: `gemini-2.5-flash-native-audio-preview-09-2025`
+*   **Protocol**: WebSocket (Real-time bi-directional streaming)
+*   **SDK Used**: `@google/genai` (Google GenAI SDK)
+*   **Key Features Active**:
+    *   **Audio-In**: Processes raw PCM audio from the user's microphone in real-time.
+    *   **Audio-Out**: Streams raw PCM audio responses from the model.
+    *   **Function Calling**: Used for the `notifyResult` tool to terminate the interview.
+    *   **Transcription**: Uses `google_speech_v2` (internal to the Live API) for both input and output text logging.
+
+## 2. Environment Variables
+The application relies on a single environment variable to authenticate with Google services.
+
+*   **Variable Name**: `API_KEY`
+*   **Required Value**: A valid Google Gemini API Key.
+*   **Configuration Location**:
+    *   **Local Development**: This is read from your local shell environment or `.env` file (if configured with dotenv).
+    *   **Production (Vercel)**: This is read from the Vercel Project Settings > Environment Variables.
+*   **Code Reference**: 
+    In `vite.config.ts`, this variable is injected into the frontend build:
+    ```typescript
+    define: {
+      'process.env.API_KEY': JSON.stringify(env.API_KEY),
+    },
+    ```
+
+## 3. Transcription Configuration
+To generate the "Interview Log" instead of a video recording, the app uses specific configuration flags in `InterviewScreen.tsx`:
+
+```typescript
+config: {
+  // ...
+  inputAudioTranscription: { model: "google_speech_v2" },  // Transcribes User Speech
+  outputAudioTranscription: { model: "google_speech_v2" } // Transcribes AI Speech
+}
+```
+
+## 4. Requirement for Deployment
+When deploying to Vercel (or any other host), you **MUST** define `API_KEY` in the build environment. Without this, the `process.env.API_KEY` in the code will be undefined, and the WebSocket connection to Gemini will fail immediately.

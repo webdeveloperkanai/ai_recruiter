@@ -1,0 +1,71 @@
+# Google Sheets Integration Setup Guide
+
+Since this is a frontend-only application (React), we cannot directly access Google Sheets securely without exposing secrets. The industry-standard solution for this is using a "Google Apps Script Web App".
+
+Follow these steps exactly to connect your app to a Google Sheet.
+
+## Step 1: Create the Google Sheet
+1. Go to [sheets.google.com](https://sheets.google.com).
+2. Create a new Sheet named **"Cehpoint Interview Logs"**.
+3. In the first row (Header), add these columns exactly:
+   - **Column A**: Date
+   - **Column B**: Name
+   - **Column C**: Role
+   - **Column D**: Language
+   - **Column E**: Status
+   - **Column F**: Notes
+   - **Column G**: Transcript
+
+## Step 2: Add the Backend Script
+1. In your Google Sheet, click **Extensions** > **Apps Script**.
+2. Delete any code in the editor and paste the following code:
+
+```javascript
+function doPost(e) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    
+    // Parse the data sent from React
+    var data = JSON.parse(e.postData.contents);
+    
+    // Append the row
+    sheet.appendRow([
+      data.date,
+      data.name,
+      data.role,
+      data.language,
+      data.status,
+      data.notes,
+      data.transcript
+    ]);
+    
+    return ContentService.createTextOutput(JSON.stringify({ "result": "success" }))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ "result": "error", "error": error.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+```
+
+## Step 3: Deploy as Web App
+1. Click the blue **Deploy** button (top right) > **New deployment**.
+2. Click the "Select type" gear icon > **Web app**.
+3. Fill in these details:
+   - **Description**: Recruiter API
+   - **Execute as**: Me (your email)
+   - **Who has access**: **Anyone** (This is crucial! It allows your React app to send data without user login).
+4. Click **Deploy**.
+5. Copy the **Web app URL** (It starts with `https://script.google.com/macros/s/...`).
+
+## Step 4: Connect to Your App
+1. Go to your local environment (or Vercel).
+2. Add a new Environment Variable:
+   - **Key**: `GOOGLE_SHEET_URL`
+   - **Value**: (Paste the Web app URL you copied in Step 3)
+3. If running locally, restart your server (`npm run dev`).
+4. If on Vercel, go to Settings > Environment Variables, add it, and **Redeploy**.
+
+## Done!
+Now, whenever an interview finishes, the app will automatically send the data to this sheet. You will see a "Syncing..." indicator on the result screen.
