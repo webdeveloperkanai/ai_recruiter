@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { GoogleGenAI, LiveServerMessage, Modality, Type, FunctionDeclaration } from '@google/genai';
 import { InterviewConfig, InterviewResult, TranscriptEntry } from '../types';
 import { createPcmBlob, decodeAudioData, base64ToUint8Array } from '../utils/audio-utils';
-import { Mic, StopCircle, Clock, Wifi, Activity, AlertCircle, Phone, Mail, CheckCircle, FileText } from 'lucide-react';
+import { Mic, StopCircle, Clock, Wifi, Activity, AlertCircle, Phone, Mail, CheckCircle } from 'lucide-react';
 
 interface InterviewScreenProps {
   config: InterviewConfig;
@@ -239,7 +239,7 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({ config, onComp
             }
 
             // --- Handle Tool Calls ---
-            if (msg.toolCall) {
+            if (msg.toolCall?.functionCalls) {
                 for (const fc of msg.toolCall.functionCalls) {
                     if (fc.name === 'notifyResult') {
                         const { passed, reason } = fc.args as any;
@@ -291,7 +291,7 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({ config, onComp
                 sourcesRef.current.add(source);
             }
           },
-          onclose: (e) => {
+          onclose: () => {
               setIsConnected(false);
               if (!isIntentionalCloseRef.current) {
                   handleRetry();
