@@ -9,7 +9,7 @@ interface InterviewScreenProps {
   onComplete: (result: InterviewResult) => void;
 }
 
-const API_KEY = process.env.API_KEY || ''; 
+const API_KEY =  'AIzaSyC7PSt7QK86NwkYYFZxI35D2Aj4xTy-veg'; 
 
 export const InterviewScreen: React.FC<InterviewScreenProps> = ({ config, onComplete }) => {
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes strict
